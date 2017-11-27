@@ -15,15 +15,20 @@ class HMMTagger():
 
     def test(self, TEST_DATA):
         test_data = self.read_tagged_corpus(TEST_DATA)
-        total = 0
-        correct = 0
+        correct_tags = 0
+        total_tags = 0
+        correct_sents = 0
+        total_sents = len(test_data)
         for sentence in test_data:
             pred_tagging = self.tag(list(map(lambda x: x[0], sentence)))
             for (_, gold_tag), (_, pred_tag) in zip(sentence, pred_tagging):
                 if gold_tag == pred_tag:
-                    correct += 1
-            total += len(sentence)
-        print(correct / total)
+                    correct_tags += 1
+            if sentence == pred_tagging:
+                correct_sents += 1
+            total_tags += len(sentence)
+        print('Token Accuracy: {} / {} - {:.2f}%'.format(correct_tags, total_tags, correct_tags / total_tags * 100))
+        print('Sentence Accuracy: {} / {} - {:.2f}%'.format(correct_sents, total_sents, correct_sents / total_sents * 100))
 
     def read_tagged_sentence(self, f):
         line = f.readline()
