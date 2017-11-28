@@ -2,6 +2,7 @@ import os
 import shutil
 
 from tagger import PerceptronTagger
+from util import write_tagged_sentence
 
 if __name__ == '__main__':
     TRAIN_DATA = 'data/en-ud-train.upos.tsv'
@@ -9,8 +10,8 @@ if __name__ == '__main__':
     RAW_DIR = 'data/raw/'
     TAGGED_DIR = 'data/tagged/'
 
-    print('Training Tagger')
     tagger = PerceptronTagger()
+    print('Training {} Tagger'.format(tagger.name))
     tagger.train(TRAIN_DATA)
 
     if os.path.exists(TAGGED_DIR):
@@ -21,13 +22,15 @@ if __name__ == '__main__':
     for subdir in subdirs:
         subdir_name = subdir[0].rsplit('/', 1)[-1]
         os.makedirs(TAGGED_DIR + subdir_name)
+        
         for filename in subdir[2]:
             print('Tagging', RAW_DIR + subdir_name + '/' + filename)
+            
             raw_file = open(RAW_DIR + subdir_name + '/' + filename, 'r')
             tagged_file = open(TAGGED_DIR + subdir_name + '/' + filename, 'w')
+            
             for sentence in raw_file:
-                for token, tag in tagger.tag(sentence.split()):
-                    tagged_file.write('{}\t{}\n'.format(token, tag))
-                tagged_file.write('\n')
+                write_tagged_sentence(tagged_file, tagger.tag(sentence.split()))
+
             raw_file.close()
             tagged_file.close()
