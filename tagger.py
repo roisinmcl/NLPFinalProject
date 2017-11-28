@@ -1,10 +1,6 @@
 from nltk import word_tokenize, pos_tag
 from nltk.tag import hmm, perceptron
 
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.feature_extraction import DictVectorizer
-from sklearn.pipeline import Pipeline
-
 
 def read_tagged_sentence(f):
     line = f.readline()
@@ -54,54 +50,6 @@ class HMMTagger():
 
     def tag(self, sentence):
         return self.tagger.tag(sentence)
-
-
-class DTCTagger():
-    def __init__(self):
-        self.clf = Pipeline([
-            ('vectorizer', DictVectorizer(sparse=False)),
-            ('classifier', DecisionTreeClassifier(criterion='entropy'))
-        ])
-
-    def train(self, filename):
-        features, tags = self.transform(read_tagged_corpus(filename))
-        self.clf.fit(features, tags)
-
-    def tag(self, sentence):
-        tags = self.clf.predict([self.get_features(sentence, i) for i in range(len(sentence))])
-        return list(zip(sentence, tags))
-
-    def get_features(self, sentence, index):
-        return {
-            'word': sentence[index],
-            'capitalized': sentence[index][0].isupper(),
-            'uppercase': sentence[index].isupper(),
-            'lowercase': sentence[index].islower(),
-            'first': index == 0,
-            'last': index == len(sentence) - 1,
-            'prefix_1': sentence[index][0],
-            'prefix_2': sentence[index][:2],
-            'prefix_3': sentence[index][:3],
-            'prefix_4': sentence[index][:4],
-            'suffix_1': sentence[index][-1],
-            'suffix_2': sentence[index][-2:],
-            'suffix_3': sentence[index][-3:],
-            'suffix_4': sentence[index][-4:],
-            'previous': sentence[index - 1] if index != 0 else '',
-            'next': sentence[index + 1] if index != len(sentence) - 1 else '',
-            'has_hyphen': '-' in sentence[index],
-            'numeric': sentence[index].isdigit(),
-            'camal_case': sentence[index][1:] != sentence[index][1:].lower()
-        }
-
-    def transform(self, sentences):
-        features, tags = [], []
-        for sentence in sentences:
-            for i in range(len(sentence)):
-                features.append(self.get_features([word for (word, _) in sentence], i))
-                tags.append(sentence[i][1])
-        return features, tags
-
 
 class PerceptronTagger():
     def __init__(self):
