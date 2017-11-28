@@ -51,6 +51,9 @@ class HMMTagger():
     def tag(self, sentence):
         return self.tagger.tag(sentence)
 
+    def test(self, filename):
+        return test(self, filename)
+
 class PerceptronTagger():
     def __init__(self):
         self.tagger = perceptron.PerceptronTagger(load=False)
@@ -61,6 +64,9 @@ class PerceptronTagger():
     def tag(self, sentence):
         return self.tagger.tag(sentence)
 
+    def test(self, filename):
+        return test(self, filename)
+
 
 if __name__ == '__main__':
     TRAIN_DATA = 'data/en-ud-train.upos.tsv'
@@ -69,5 +75,5 @@ if __name__ == '__main__':
 
     tagger = PerceptronTagger()
     tagger.train(TRAIN_DATA)
-    test(tagger, TEST_DATA)
-    test(tagger, DEV_DATA)
+    tagger.test(TEST_DATA)
+    tagger.test(DEV_DATA)

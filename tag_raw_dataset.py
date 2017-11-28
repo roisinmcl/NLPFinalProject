@@ -9,8 +9,9 @@ if __name__ == '__main__':
     RAW_DIR = 'data/raw/'
     TAGGED_DIR = 'data/tagged/'
 
-    # tagger = PerceptronTagger()
-    # tagger.train(TRAIN_DATA)
+    print('Training Tagger')
+    tagger = PerceptronTagger()
+    tagger.train(TRAIN_DATA)
 
     if os.path.exists(TAGGED_DIR):
         shutil.rmtree(TAGGED_DIR)
@@ -21,5 +22,12 @@ if __name__ == '__main__':
         subdir_name = subdir[0].rsplit('/', 1)[-1]
         os.makedirs(TAGGED_DIR + subdir_name)
         for filename in subdir[2]:
-            with open(TAGGED_DIR + subdir_name + '/' + filename, 'w') as f:
-                f.write(filename)
+            print('Tagging', RAW_DIR + subdir_name + '/' + filename)
+            raw_file = open(RAW_DIR + subdir_name + '/' + filename, 'r')
+            tagged_file = open(TAGGED_DIR + subdir_name + '/' + filename, 'w')
+            for sentence in raw_file:
+                for token, tag in tagger.tag(sentence.split()):
+                    tagged_file.write('{}\t{}\n'.format(token, tag))
+                tagged_file.write('\n')
+            raw_file.close()
+            tagged_file.close()
