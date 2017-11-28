@@ -27,6 +27,23 @@ def read_tagged_corpus(filename):
             sentence = read_tagged_sentence(f)
     return sentences
 
+def test(tagger, filename):
+    test_data = read_tagged_corpus(filename)
+    correct_tags = 0
+    total_tags = 0
+    correct_sents = 0
+    total_sents = len(test_data)
+    for sentence in test_data:
+        pred_tagging = tagger.tag(list(map(lambda x: x[0], sentence)))
+        for (_, gold_tag), (_, pred_tag) in zip(sentence, pred_tagging):
+            if gold_tag == pred_tag:
+                correct_tags += 1
+        if sentence == pred_tagging:
+            correct_sents += 1
+        total_tags += len(sentence)
+    print('Token Accuracy: {} / {} - {:.2f}%'.format(correct_tags, total_tags, correct_tags / total_tags * 100))
+    print('Sentence Accuracy: {} / {} - {:.2f}%'.format(correct_sents, total_sents, correct_sents / total_sents * 100))
+
 
 class HMMTagger():
     def __init__(self):
@@ -37,23 +54,6 @@ class HMMTagger():
 
     def tag(self, sentence):
         return self.tagger.tag(sentence)
-
-    def test(self, filename):
-        test_data = read_tagged_corpus(filename)
-        correct_tags = 0
-        total_tags = 0
-        correct_sents = 0
-        total_sents = len(test_data)
-        for sentence in test_data:
-            pred_tagging = self.tag(list(map(lambda x: x[0], sentence)))
-            for (_, gold_tag), (_, pred_tag) in zip(sentence, pred_tagging):
-                if gold_tag == pred_tag:
-                    correct_tags += 1
-            if sentence == pred_tagging:
-                correct_sents += 1
-            total_tags += len(sentence)
-        print('Token Accuracy: {} / {} - {:.2f}%'.format(correct_tags, total_tags, correct_tags / total_tags * 100))
-        print('Sentence Accuracy: {} / {} - {:.2f}%'.format(correct_sents, total_sents, correct_sents / total_sents * 100))
 
 
 class DTCTagger():
@@ -70,23 +70,6 @@ class DTCTagger():
     def tag(self, sentence):
         tags = self.clf.predict([self.get_features(sentence, i) for i in range(len(sentence))])
         return list(zip(sentence, tags))
-
-    def test(self, filename):
-        test_data = read_tagged_corpus(filename)
-        correct_tags = 0
-        total_tags = 0
-        correct_sents = 0
-        total_sents = len(test_data)
-        for sentence in test_data:
-            pred_tagging = self.tag(list(map(lambda x: x[0], sentence)))
-            for (_, gold_tag), (_, pred_tag) in zip(sentence, pred_tagging):
-                if gold_tag == pred_tag:
-                    correct_tags += 1
-            if sentence == pred_tagging:
-                correct_sents += 1
-            total_tags += len(sentence)
-        print('Token Accuracy: {} / {} - {:.2f}%'.format(correct_tags, total_tags, correct_tags / total_tags * 100))
-        print('Sentence Accuracy: {} / {} - {:.2f}%'.format(correct_sents, total_sents, correct_sents / total_sents * 100))
 
     def get_features(self, sentence, index):
         return {
@@ -130,23 +113,6 @@ class PerceptronTagger():
     def tag(self, sentence):
         return self.tagger.tag(sentence)
 
-    def test(self, filename):
-        test_data = read_tagged_corpus(filename)
-        correct_tags = 0
-        total_tags = 0
-        correct_sents = 0
-        total_sents = len(test_data)
-        for sentence in test_data:
-            pred_tagging = self.tag(list(map(lambda x: x[0], sentence)))
-            for (_, gold_tag), (_, pred_tag) in zip(sentence, pred_tagging):
-                if gold_tag == pred_tag:
-                    correct_tags += 1
-            if sentence == pred_tagging:
-                correct_sents += 1
-            total_tags += len(sentence)
-        print('Token Accuracy: {} / {} - {:.2f}%'.format(correct_tags, total_tags, correct_tags / total_tags * 100))
-        print('Sentence Accuracy: {} / {} - {:.2f}%'.format(correct_sents, total_sents, correct_sents / total_sents * 100))
-
 
 if __name__ == '__main__':
     TRAIN_DATA = 'data/en-ud-train.upos.tsv'
@@ -154,9 +120,6 @@ if __name__ == '__main__':
     DEV_DATA = 'data/en-ud-dev.upos.tsv'
 
     tagger = PerceptronTagger()
-    print('Training Model')
     tagger.train(TRAIN_DATA)
-    print('Training Complete')
-    print('Testing Model')
-    tagger.test(TEST_DATA)
-    tagger.test(DEV_DATA)
+    test(tagger, TEST_DATA)
+    test(tagger, DEV_DATA)
