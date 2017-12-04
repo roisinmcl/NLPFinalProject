@@ -5,14 +5,11 @@ from tagger import PerceptronTagger
 from util import write_tagged_sentence
 
 if __name__ == '__main__':
-    TRAIN_DATA = 'data/en-ud-train.upos.tsv'
-
     RAW_DIR = 'data/raw/'
     TAGGED_DIR = 'data/tagged/'
 
-    tagger = PerceptronTagger()
-    print('Training {} Tagger'.format(tagger.name))
-    tagger.train(TRAIN_DATA)
+    tagger = PerceptronTagger(True)
+    print('Using {} Tagger'.format(tagger.name))
 
     if os.path.exists(TAGGED_DIR):
         shutil.rmtree(TAGGED_DIR)
