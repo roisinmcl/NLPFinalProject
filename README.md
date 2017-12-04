@@ -8,8 +8,10 @@ The data can also be downloaded [here](https://www.dropbox.com/s/k5qpdwc2i94l8f0
 
 Tag the data with:
 ```
-python tag_raw_dataset.py
+python tag_raw_dataset.py --tagger <tagger_name>
 ```
+
+Valid tagger names include `hmm`, `perceptron`, and `spacy`.
 
 To run the perceptron on the untagged data, run:
 ```
