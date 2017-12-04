@@ -1,14 +1,27 @@
+from argparse import ArgumentParser
 import os
 import shutil
+import sys
 
-from tagger import PerceptronTagger
+from tagger import HMMTagger, PerceptronTagger, SpacyTagger
 from util import write_tagged_sentence
 
 if __name__ == '__main__':
     RAW_DIR = 'data/raw/'
     TAGGED_DIR = 'data/tagged/'
 
-    tagger = PerceptronTagger(True)
+    parser = ArgumentParser()
+    parser.add_argument('--tagger', '-t', required=True)
+    args = parser.parse_args()
+    if args.tagger == 'hmm':
+        tagger = HMMTagger()
+    elif args.tagger == 'perceptron':
+        tagger = PerceptronTagger(True)
+    elif args.tagger == 'spacy':
+        tagger = SpacyTagger()
+    else:
+        print('Invalid Tagger')
+        sys.exit(1)
     print('Using {} Tagger'.format(tagger.name))
 
     if os.path.exists(TAGGED_DIR):
