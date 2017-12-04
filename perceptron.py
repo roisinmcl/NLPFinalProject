@@ -21,17 +21,6 @@ from nltk.corpus import wordnet
 
 from evaluation import Eval
 
-def get_pos_tag(tag):
-    if tag[0] == 'J':
-        return wordnet.ADJ
-    elif tag[0] == 'V':
-        return wordnet.VERB
-    elif tag[0] == 'N':
-        return wordnet.NOUN
-    elif tag[0] == 'R':
-        return wordnet.ADV
-    else:
-        return None
 
 # taken from https://stackoverflow.com/questions/13214809/pretty-print-2d-python-list
 def print_matrix(matrix):
@@ -42,17 +31,15 @@ def print_matrix(matrix):
     print('\n'.join(table))
 
 
-def load_docs(direc, lemmatize, labelMapFile='labels.csv'):
+def load_docs(direc, lemmatize):
     """Return a list of word-token-lists, one per document.
     Words are optionally lemmatized with WordNet."""
 
-
     labelMap = {}   # docID => gold label, loaded from mapping file
-    with open(os.path.join(direc, labelMapFile)) as inF:
-        for ln in inF:
-            docid, label = ln.strip().split(',')
-            assert docid not in labelMap
-            labelMap[docid] = label
+    for file_path in glob.glob(os.path.join(direc, '*.txt')):
+        filename = os.path.basename(file_path)
+        party = filename[-7]
+        labelMap[filename] = party 
 
     # create parallel lists of documents and labels
     docs, labels = [], []
@@ -119,19 +106,19 @@ def extract_feats(doc, lemmatized_docs=None):
 def load_featurized_docs(datasplit):
     rawdocs, labels = load_docs(datasplit, lemmatize=False)
     
-    lemmatized_docs, lemma_labels = load_docs(datasplit, lemmatize=True)
+    #lemmatized_docs, lemma_labels = load_docs(datasplit, lemmatize=True)
     
     assert len(rawdocs)==len(labels)>0,datasplit
     featdocs = []
     for d in range(0, len(rawdocs)):
         # Use second call to extract_feats if using lemmatizing feature, first call otherwise
-        #featdocs.append(extract_feats(rawdocs[d]))
-        featdocs.append(extract_feats(rawdocs[d], lemmatized_docs[d]))
+        featdocs.append(extract_feats(rawdocs[d]))
+        #featdocs.append(extract_feats(rawdocs[d], lemmatized_docs[d]))
     return featdocs, labels
 
 class Perceptron:
     def __init__(self, train_docs, train_labels, MAX_ITERATIONS=100, dev_docs=None, dev_labels=None):
-        self.CLASSES = ['ARA', 'DEU', 'FRA', 'HIN', 'ITA', 'JPN', 'KOR', 'SPA', 'TEL', 'TUR', 'ZHO']
+        self.CLASSES = ['D', 'R', 'I']
         self.MAX_ITERATIONS = MAX_ITERATIONS
         self.dev_docs = dev_docs
         self.dev_labels = dev_labels
@@ -176,11 +163,11 @@ class Perceptron:
 
 
     def highest_features(self, label):
-        return self.weights[label].most_common(10)
+        return self.weights[label].most_common(20)
 
 
     def lowest_features(self, label):
-        return self.weights[label].most_common()[:-10-1:-1] 
+        return self.weights[label].most_common()[:-20-1:-1] 
         
 
     def learn(self, train_docs, train_labels):
@@ -217,6 +204,7 @@ class Perceptron:
                     updates += 1
                     
                     for word, count in doc.items():
+                        # TODO: change this to be changed by the weight, not 1
                         self.weights[predicted_label][word] -= 1
                         self.weights[train_label][word] += 1
                 else:
@@ -260,16 +248,16 @@ if __name__ == "__main__":
     args = sys.argv[1:]
     niters = int(args[0])
 
-    train_docs, train_labels = load_featurized_docs('train')
+    train_docs, train_labels = load_featurized_docs('data/raw/train')
     print(len(train_docs), 'training docs with',
         sum(len(d) for d in train_docs)/len(train_docs), 'percepts on avg', file=sys.stderr)
 
-    dev_docs,  dev_labels  = load_featurized_docs('dev')
+    dev_docs,  dev_labels  = load_featurized_docs('data/raw/dev')
     print(len(dev_docs), 'dev docs with',
         sum(len(d) for d in dev_docs)/len(dev_docs), 'percepts on avg', file=sys.stderr)
 
 
-    test_docs,  test_labels  = load_featurized_docs('test')
+    test_docs,  test_labels  = load_featurized_docs('data/raw/test')
     print(len(test_docs), 'test docs with',
         sum(len(d) for d in test_docs)/len(test_docs), 'percepts on avg', file=sys.stderr)
 
@@ -285,7 +273,7 @@ if __name__ == "__main__":
     for label in ptron.CLASSES:
         
         print("--------------------")
-        print("\nLANGUAGE: " + label)
+        print("\LABEL: " + label)
 
         # Highest and Lowest Features
         high_feats = ptron.highest_features(label)

@@ -6,6 +6,12 @@ The data can also be downloaded [here](https://www.dropbox.com/s/k5qpdwc2i94l8f0
 
 ## Running Project
 
+Tag the data with:
 ```
 python tag_raw_dataset.py
+```
+
+To run the perceptron on the untagged data, run:
+```
+python perceptron.py <num_iterations>
 ```
