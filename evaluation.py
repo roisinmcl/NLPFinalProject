@@ -21,7 +21,10 @@ class Eval:
             if (self.gold[i] != label) and (self.pred[i] == label):
                 false_positives += 1
 
-    	return true_positives / (true_positives + false_positives)
+        if (true_positives + false_positives) > 0:
+            return true_positives / (true_positives + false_positives)
+        else:
+            return 0
 
     def recall(self, label):
         # True positives / (true positives + false negatives)
@@ -34,7 +37,10 @@ class Eval:
             if (self.gold[i] == label) and (self.pred[i] != label):
                 false_negatives += 1
 
-    	return true_positives / (true_positives + false_negatives)
+        if (true_positives + false_negatives) > 0:
+            return true_positives / (true_positives + false_negatives)
+        else:
+            return 0
 
     def f1(self, label):
         precision = self.precision(label)
