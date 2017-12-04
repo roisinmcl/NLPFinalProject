@@ -6,6 +6,12 @@ The data can also be downloaded [here](https://www.dropbox.com/s/k5qpdwc2i94l8f0
 
 ## Running Project
 
+Project requires `nltk` and `spacy`
+
+```
+pip install -r requirements.txt
+```
+
 Tag the data with:
 ```
 python tag_raw_dataset.py --tagger <tagger_name>

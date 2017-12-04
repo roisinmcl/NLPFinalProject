@@ -1,6 +1,9 @@
 from nltk import word_tokenize, pos_tag
 from nltk.tag import hmm, perceptron
-import spacy
+try: # spacy can be tricky to install
+    import spacy
+except ImportError:
+    pass
 
 from util import read_tagged_corpus
 
