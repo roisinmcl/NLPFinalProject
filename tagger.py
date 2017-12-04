@@ -1,5 +1,6 @@
 from nltk import word_tokenize, pos_tag
 from nltk.tag import hmm, perceptron
+import spacy
 
 from util import read_tagged_corpus
 
@@ -51,6 +52,21 @@ class PerceptronTagger(Tagger):
 
     def tag(self, sentence):
         return self.tagger.tag(sentence)
+
+    def test(self, filename):
+        return super().test(filename)
+
+
+class SpacyTagger(Tagger):
+    def __init__(self):
+        super().__init__('Spacy')
+        self.nlp = spacy.load('en')
+
+    def train(self, filename):
+        pass
+
+    def tag(self, sentence):
+        return [(token.text, token.pos_) for token in self.nlp(' '.join(sentence))]
 
     def test(self, filename):
         return super().test(filename)
