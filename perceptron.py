@@ -20,7 +20,10 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import wordnet
 
 from evaluation import Eval
+from sentiment import get_sentiment
 
+
+SENTIMENT_WORDS = ['taxes', 'tax', 'gun control', 'immigration', 'obamacare']
 
 # taken from https://stackoverflow.com/questions/13214809/pretty-print-2d-python-list
 def print_matrix(matrix):
@@ -86,7 +89,6 @@ def extract_feats(doc, lemmatized_docs=None):
     ff += Counter(bigrams)
     ff['bias'] = 1
     
-    
 
     # Lemmatized Features - not used in most accurate model
     ff += Counter(lemmatized_docs) 
@@ -100,6 +102,19 @@ def extract_feats(doc, lemmatized_docs=None):
     ff += Counter(lowercase_doc)
     ff['bias'] = 1
     
+
+    # Senitment Analysis
+    text = ' '.join(lowercase_doc)
+    for word in SENTIMENT_WORDS:
+        if word in lowercase_doc:
+            sentiment = get_sentiment(text)
+            key = "sent-" + word
+            ff[key] = sentiment
+        else:
+            ff[key] = 0
+        #print("Sentiment for word " + word)
+        #print(ff[word])
+
 
     return ff
 
