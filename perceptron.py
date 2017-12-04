@@ -101,6 +101,18 @@ def extract_feats(doc, lemmatized_docs=None):
     ff['bias'] = 1
     
 
+    # Senitment Analysis
+    text = ' '.join(lowercase_doc)
+    for word in SENTIMENT_WORDS:
+        key = "sent-" + word
+        if word in lowercase_doc:
+            sentiment = get_sentiment(text)
+            ff[key] = sentiment
+        else:
+            ff[key] = 0
+        #print("Sentiment for word " + word)
+        #print(ff[word])
+
     return ff
 
 def load_featurized_docs(datasplit):

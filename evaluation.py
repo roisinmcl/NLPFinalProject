@@ -11,28 +11,28 @@ class Eval:
         return numer / len(self.gold)
 
     def precision(self, label):
-    	# True positives / (true positives + false positivies)
-    	true_positives = 0
-    	for i in range(0, len(self.gold)):
-    		if (self.gold[i] == label) and (self.pred[i] == label):
-    			true_positives += 1
-    	false_positives = 0
-    	for i in range(0, len(self.gold)):
-    		if (self.gold[i] != label) and (self.pred[i] == label):
-    			false_positives += 1
+    # True positives / (true positives + false positivies)
+        true_positives = 0
+        for i in range(0, len(self.gold)):
+            if (self.gold[i] == label) and (self.pred[i] == label):
+                true_positives += 1
+        false_positives = 0
+        for i in range(0, len(self.gold)):
+            if (self.gold[i] != label) and (self.pred[i] == label):
+                false_positives += 1
 
     	return true_positives / (true_positives + false_positives)
 
     def recall(self, label):
-    	# True positives / (true positives + false negatives)
-    	true_positives = 0
-    	for i in range(0, len(self.gold)):
-    		if (self.gold[i] == label) and (self.pred[i] == label):
-    			true_positives += 1
-    	false_negatives = 0
-    	for i in range(0, len(self.gold)):
-    		if (self.gold[i] == label) and (self.pred[i] != label):
-    			false_negatives += 1
+        # True positives / (true positives + false negatives)
+        true_positives = 0
+        for i in range(0, len(self.gold)):
+            if (self.gold[i] == label) and (self.pred[i] == label):
+                true_positives += 1
+        false_negatives = 0
+        for i in range(0, len(self.gold)):
+            if (self.gold[i] == label) and (self.pred[i] != label):
+                false_negatives += 1
 
     	return true_positives / (true_positives + false_negatives)
 
