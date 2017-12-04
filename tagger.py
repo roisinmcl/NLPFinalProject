@@ -42,9 +42,9 @@ class HMMTagger(Tagger):
 
 
 class PerceptronTagger(Tagger):
-    def __init__(self):
+    def __init__(self, load):
         super().__init__('Perceptron')
-        self.tagger = perceptron.PerceptronTagger(load=False)
+        self.tagger = perceptron.PerceptronTagger(load=load)
 
     def train(self, filename):
         self.tagger.train(read_tagged_corpus(filename))
@@ -54,14 +54,3 @@ class PerceptronTagger(Tagger):
 
     def test(self, filename):
         return super().test(filename)
-
-
-if __name__ == '__main__':
-    TRAIN_DATA = 'data/en-ud-train.upos.tsv'
-    TEST_DATA = 'data/en-ud-test.upos.tsv'
-    DEV_DATA = 'data/en-ud-dev.ppos.tsv'
-
-    tagger = PerceptronTagger()
-    tagger.train(TRAIN_DATA)
-    tagger.test(TEST_DATA)
-    tagger.test(DEV_DATA)
