@@ -37,13 +37,16 @@ class Eval:
     	return true_positives / (true_positives + false_negatives)
 
     def f1(self, label):
-    	precision = self.precision(label)
-    	recall = self.recall(label)
-    	return 2 * precision * recall / (precision + recall)
+        precision = self.precision(label)
+        recall = self.recall(label)
+        if (precision + recall) > 0:
+            return 2 * precision * recall / (precision + recall)
+        else:
+            return 0
 
     def confusion_matrix(self):
     	label_indicies = {}
-    	labels = ['ARA', 'DEU', 'FRA', 'HIN', 'ITA', 'JPN', 'KOR', 'SPA', 'TEL', 'TUR', 'ZHO']
+    	labels = ['R', 'D', 'I']
     	ind = 0
     	for label in labels:
     		label_indicies[label] = ind
