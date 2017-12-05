@@ -15,7 +15,6 @@ from numpy import mean
 import numpy as np
 
 from nltk.stem.wordnet import WordNetLemmatizer
-from nltk.tag import pos_tag
 from nltk.tokenize import word_tokenize
 from nltk.corpus import wordnet
 
@@ -25,7 +24,6 @@ from sentiment import NBClassifier, get_sentiment
 
 SENTIMENT_WORDS = ['taxes', 'tax', 'gun control', 'immigration', 'obamacare']
 
-# TODO: global variables are bad, fix later
 global sentiment_classifier
 
 # taken from https://stackoverflow.com/questions/13214809/pretty-print-2d-python-list
@@ -54,23 +52,14 @@ def load_docs(direc, lemmatize):
         doc_words = []
         with open(os.path.join(direc, filename)) as inF:
             for ln in inF:
-                if lemmatize:
-                    words = word_tokenize(ln)
-                    tagged_words = pos_tag(words)
-                    doc_words = []
-                    for word in tagged_words:
-                        if get_pos_tag(word[1]) == None:
-                            lemmatized_word = WordNetLemmatizer().lemmatize(word[0])
-                        else:
-                            lemmatized_word = WordNetLemmatizer().lemmatize(word[0], get_pos_tag(word[1]))
-                        doc_words.append(lemmatized_word)
-                else:
-                    doc_words += ln.split(' ')
+                if ln == '\n': # trailing newline in file
+                    continue
+                word, tag = ln.split('\t')
+                doc_words.append((word, tag))
         
         docs.append(doc_words)
         label = labelMap[filename]
         labels.append(label)
-
     return docs, labels
 
 def extract_feats(doc, lemmatized_docs=None):
@@ -81,16 +70,18 @@ def extract_feats(doc, lemmatized_docs=None):
     """
     global sentiment_classifier
 
+    # doc is in form [(word, tag) ...]
+    words = [word for word, _ in doc]
+
     ff = Counter()
 
     # Unigram Features
-    ff += Counter(doc)
+    ff += Counter(words)
     ff['bias'] = 1
     
 
     # Bigram Features
-    offset_doc = doc[1:]
-    bigrams = zip(doc, offset_doc)
+    bigrams = zip(words, words[1:])
     ff += Counter(bigrams)
     ff['bias'] = 1
     
@@ -99,26 +90,29 @@ def extract_feats(doc, lemmatized_docs=None):
     ff += Counter(lemmatized_docs) 
     ff['bias'] = 1
 
-
     # Case Normalization Features
     lowercase_doc = []
-    for word in doc:
+    for word in words:
         lowercase_doc.append(word.lower())
     ff += Counter(lowercase_doc)
     ff['bias'] = 1
 
-    # Senitment Analysis
+    # Sentiment Analysis
     text = ' '.join(lowercase_doc)
     for word in SENTIMENT_WORDS:
         key = "sent-" + word
         if word in lowercase_doc:
             sentiment = sentiment_classifier.get_sentiment(text)
-#            ff[key] = sentiment
-#            sentiment = get_sentiment(text)
+            ff[key] = sentiment
         else:
             ff[key] = 0
-        #print("Sentiment for word " + word)
-        #print(ff[word])
+
+    # POS Tagging
+    pos = zip(words, words[1:], [tag for _, tag in doc])
+    ff += Counter(pos)
+    ff['bias'] += 1
+
+    # TODO: might also want to experiment with lemmatizing
 
     return ff
 
@@ -264,7 +258,6 @@ class Perceptron:
 
 
 if __name__ == "__main__":
-    start = time.time()
     global sentiment_classifier
 
     args = sys.argv[1:]
@@ -273,16 +266,16 @@ if __name__ == "__main__":
     sentiment_classifier = NBClassifier()
     sentiment_classifier.train()
 
-    train_docs, train_labels = load_featurized_docs('data/raw/train')
+    train_docs, train_labels = load_featurized_docs('data/tagged/train')
     print(len(train_docs), 'training docs with',
         sum(len(d) for d in train_docs)/len(train_docs), 'percepts on avg', file=sys.stderr)
 
-    dev_docs,  dev_labels  = load_featurized_docs('data/raw/dev')
+    dev_docs,  dev_labels  = load_featurized_docs('data/tagged/dev')
     print(len(dev_docs), 'dev docs with',
         sum(len(d) for d in dev_docs)/len(dev_docs), 'percepts on avg', file=sys.stderr)
 
 
-    test_docs,  test_labels  = load_featurized_docs('data/raw/test')
+    test_docs,  test_labels  = load_featurized_docs('data/tagged/test')
     print(len(test_docs), 'test docs with',
         sum(len(d) for d in test_docs)/len(test_docs), 'percepts on avg', file=sys.stderr)
 
