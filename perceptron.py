@@ -7,7 +7,7 @@ Usage: python perceptron.py NITERATIONS
 (Adapted from Alan Ritter)
 
 """
-import sys, os, glob
+import sys, os, glob, time
 
 from collections import Counter
 from math import log
@@ -20,10 +20,13 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import wordnet
 
 from evaluation import Eval
-from sentiment import get_sentiment
+from sentiment import NBClassifier, get_sentiment
 
 
 SENTIMENT_WORDS = ['taxes', 'tax', 'gun control', 'immigration', 'obamacare']
+
+# TODO: global variables are bad, fix later
+global sentiment_classifier
 
 # taken from https://stackoverflow.com/questions/13214809/pretty-print-2d-python-list
 def print_matrix(matrix):
@@ -76,6 +79,8 @@ def extract_feats(doc, lemmatized_docs=None):
     Each percept is a pairing of a name and a boolean, integer, or float value.
     A document's percepts are the same regardless of the label considered.
     """
+    #global sentiment_classifier
+
     ff = Counter()
 
     # Unigram Features
@@ -101,14 +106,15 @@ def extract_feats(doc, lemmatized_docs=None):
         lowercase_doc.append(word.lower())
     ff += Counter(lowercase_doc)
     ff['bias'] = 1
-    
 
     # Senitment Analysis
     text = ' '.join(lowercase_doc)
     for word in SENTIMENT_WORDS:
         key = "sent-" + word
         if word in lowercase_doc:
-            sentiment = get_sentiment(text)
+            sentiment = sentiment_classifier.get_sentiment(text)
+#            ff[key] = sentiment
+#            sentiment = get_sentiment(text)
         else:
             ff[key] = 0
         #print("Sentiment for word " + word)
@@ -258,8 +264,14 @@ class Perceptron:
 
 
 if __name__ == "__main__":
+    start = time.time()
+    global sentiment_classifier
+
     args = sys.argv[1:]
     niters = int(args[0])
+
+    sentiment_classifier = NBClassifier()
+    sentiment_classifier.train()
 
     train_docs, train_labels = load_featurized_docs('data/raw/train')
     print(len(train_docs), 'training docs with',
@@ -314,5 +326,8 @@ if __name__ == "__main__":
         print("\nRecall: " + str(ev.recall(label)))
 
         print("\nF1: " + str(ev.f1(label)))
+
+        end = time.time()
+        print(end - start)
 
 
