@@ -7,7 +7,7 @@ Usage: python perceptron.py NITERATIONS
 (Adapted from Alan Ritter)
 
 """
-import sys, os, glob, time
+import sys, os, glob
 
 from collections import Counter
 from math import log
@@ -326,8 +326,4 @@ if __name__ == "__main__":
         print("\nRecall: " + str(ev.recall(label)))
 
         print("\nF1: " + str(ev.f1(label)))
-
-        end = time.time()
-        print(end - start)
-
 
