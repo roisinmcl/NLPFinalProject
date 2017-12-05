@@ -79,7 +79,7 @@ def extract_feats(doc, lemmatized_docs=None):
     Each percept is a pairing of a name and a boolean, integer, or float value.
     A document's percepts are the same regardless of the label considered.
     """
-    #global sentiment_classifier
+    global sentiment_classifier
 
     ff = Counter()
 
