@@ -130,13 +130,19 @@ def load_featurized_docs(datasplit):
     return featdocs, labels
 
 class Perceptron:
-    def __init__(self, train_docs, train_labels, MAX_ITERATIONS=100, dev_docs=None, dev_labels=None):
+    def __init__(self, train_docs, train_labels, MAX_ITERATIONS=100, dev_docs=None, dev_labels=None, retrain=False):
         self.CLASSES = ['D', 'R', 'I']
         self.MAX_ITERATIONS = MAX_ITERATIONS
         self.dev_docs = dev_docs
         self.dev_labels = dev_labels
         self.weights = {l: Counter() for l in self.CLASSES}
-        self.learn(train_docs, train_labels)
+        if not retrain and os.path.isfile('DWeights.txt') and os.path.isfile('RWeights.txt') and os.path.isfile('IWeights.txt'):
+            self.read_weights()
+        else:
+            self.learn(train_docs, train_labels)
+
+    def __del__(self):
+        self.save_weights()
 
     def copy_weights(self):
         """
@@ -159,7 +165,7 @@ class Perceptron:
         """
         Return the highest-scoring label for the document under the current model.
         """
-        max_score = 0
+        max_score = -1
         high_label = ""
         for label in self.weights:
             doc_score = self.score(doc, label)
@@ -256,6 +262,20 @@ class Perceptron:
             print("Dev Accuracy: " + str(dev_accuracy/len(dev_docs)))
         print('\n')
 
+    def save_weights(self):
+        for label in self.CLASSES:
+            f = open(label+'Weights.txt', 'w')
+            for word in self.weights[label]:
+                f.write(word + ' ' + str(weights[label][word]) + '\n')
+            f.close()
+
+    def read_weights(self):
+        for label in self.CLASSES:
+            f = open(label+'Weights.txt', 'r')
+            for line in f:
+                parts = line.split()
+                self.weights[label][parts[0]] = int(parts[1])
+            f.close()
 
 if __name__ == "__main__":
     global sentiment_classifier
